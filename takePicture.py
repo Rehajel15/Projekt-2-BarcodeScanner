@@ -6,13 +6,30 @@ from pyzbar.pyzbar import decode
 import json
 import requests
 
+root = tk.Tk()
+root.title("Barcodescanner")
+lmain = tk.Label(root)
+lmain.pack(fill=tk.BOTH, expand=True)
+
+
+def displayData(data):
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    tk.Label(root, text=f"ID: {data['code']}").pack()
+    tk.Label(root, text=f"Produktname: {data['product']['generic_name_de']}").pack()
+    tk.Label(root, text=f"Nahrungsgruppe(n): {data['product']['food_groups']}").pack()
+    tk.Label(root, text=f"Kategorie(n): {data['product']['categories']}").pack()
+
+    
+
 def getData(barcodeDataCode):
     response = requests.get(f'https://world.openfoodfacts.org/api/v2/product/{barcodeDataCode}.json')
 
     if response.status_code == 200:
         try:
             data = response.json()
-            print(data['product']['allergens_from_ingredients'])
+            displayData(data)
         except ValueError:
             print("Fehler beim Dekodieren der JSON-Daten")
     else:
@@ -77,15 +94,8 @@ if not cap.isOpened():
     exit()
 
 # GUI erstellen
-root = tk.Tk()
-root.title("Kamera App")
-
-lmain = tk.Label(root)
-lmain.pack(fill=tk.BOTH, expand=True)
-
 take_photo_button = tk.Button(root, text="Check QR Code", command=take_photo)
 take_photo_button.pack(pady=20)
-
 update_frame()  # Starte den Kamera-Feed
 root.mainloop()
 
